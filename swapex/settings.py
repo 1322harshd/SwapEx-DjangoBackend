@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'authentication',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -74,9 +77,13 @@ WSGI_APPLICATION = 'swapex.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'SwapEx-Database',
+            'USER': 'postgres',
+            'PASSWORD': '13Dhillon@nz',#'This is the password for your local postgres pgadmin'
+            'HOST': '', #'Localhost is empty'
+            'PORT':'', #Assumes default as 5432
+    }   
 }
 
 
