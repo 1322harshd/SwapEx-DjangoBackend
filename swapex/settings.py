@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'authentication',
     'rest_framework',
+    'corsheaders',
 ]
 #Setting custom user model for authentication
 AUTH_USER_MODEL = 'authentication.Student'
@@ -51,6 +52,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'swapex.urls'
@@ -134,3 +137,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
+
+#Allowing frontend to connect to backend 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", 
+]
