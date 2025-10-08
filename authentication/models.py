@@ -15,5 +15,11 @@ class Student(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []  # Add other required fields if needed
 
+class SignupRequest(Student):
+    class Meta:
+        proxy = True
+        verbose_name = "Signup Request"
+        verbose_name_plural = "Signup Requests"
+
 
 
