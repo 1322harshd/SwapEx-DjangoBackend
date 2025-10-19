@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'authentication',
     'rest_framework',
     'corsheaders',
+    'products',
+    'django_filters',
 ]
 #Setting custom user model for authentication
 AUTH_USER_MODEL = 'authentication.Student'

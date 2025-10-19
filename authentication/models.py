@@ -27,7 +27,7 @@ class Student(AbstractUser):
     username = models.CharField(max_length=150, unique=True, null=True, blank=True)  # Make username null
     email = models.EmailField(unique=True)  
     phone_number = models.CharField(blank=True, null=True, max_length=15)
-    profile_image = models.ImageField(upload_to='profile_images/', default='profile_images/default.jpg', blank=True, null=True)
+    profile_image = models.ImageField(upload_to='profile_images/', default='profile_images/default.jpeg', blank=True, null=True)
     student_id_image = models.ImageField(upload_to='id_images/', blank=True, null=True)
     trust_badge = models.IntegerField(default=0)
     wallet_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
