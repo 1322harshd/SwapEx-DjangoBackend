@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-
+# custom user manager 
 class StudentManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email, password=None, **extra_fields):#for students
         if not email:
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
@@ -11,7 +11,7 @@ class StudentManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email, password=None, **extra_fields):#for superuser
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_approved', True)
@@ -23,8 +23,8 @@ class StudentManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
-class Student(AbstractUser):
-    username = models.CharField(max_length=150, unique=True, null=True, blank=True)  # Make username null
+class Student(AbstractUser):#custom user model
+    username = models.CharField(max_length=150, unique=True, null=True, blank=True) 
     email = models.EmailField(unique=True)  
     phone_number = models.CharField(blank=True, null=True, max_length=15)
     profile_image = models.ImageField(upload_to='profile_images/', default='profile_images/default.jpeg', blank=True, null=True)
@@ -34,18 +34,18 @@ class Student(AbstractUser):
     is_approved = models.BooleanField(default=False)
     joined_at = models.DateTimeField(auto_now_add=True)
 
-    objects = StudentManager()  
+    objects = StudentManager()#override of default user model so that we can use our custom ones (create_user and create_superuser)
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'email'#sets email as required field to login instead of username
     REQUIRED_FIELDS = []  
 
     def save(self, *args, **kwargs):
-        # Set username to email for consistency, or make it None
+        #function to set username as email 
         if self.email:
             self.username = self.email
         super().save(*args, **kwargs)
 
-class SignupRequest(Student):
+class SignupRequest(Student):#proxy model to show signup requests in admin panel
     class Meta:
         proxy = True
         verbose_name = "Signup Request"

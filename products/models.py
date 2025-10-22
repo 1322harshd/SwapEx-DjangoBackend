@@ -26,4 +26,10 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.title} — {self.seller.email}"
 
+class PendingProduct(Product):
+    class Meta:
+        proxy = True
+        verbose_name = "Pending product"
+        verbose_name_plural = "Pending products"
+
 

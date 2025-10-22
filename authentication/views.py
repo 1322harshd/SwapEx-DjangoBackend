@@ -8,9 +8,6 @@ from .serializers import StudentSignUpSerializer
 from rest_framework.decorators import api_view
 
 
-
-
-
 class StudentSignUpView(generics.CreateAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSignUpSerializer
