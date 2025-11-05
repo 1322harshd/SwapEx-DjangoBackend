@@ -5,7 +5,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import authenticate
 from .models import Student
 from .serializers import StudentSignUpSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .serializers import SellerPublicSerializer  # or your user serializer
+from decimal import Decimal
 
 
 class StudentSignUpView(generics.CreateAPIView):
@@ -108,3 +112,56 @@ def forgot_password_view(request):
             'message': 'An error occurred while updating password. Please try again.',
             'status': 'error'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def give_trust_badge(request):
+    seller_id = request.data.get('rated_user')
+    try:
+        seller = Student.objects.get(id=seller_id)
+        seller.trust_badge += 1
+        seller.save()
+        return Response({'trust_badge': seller.trust_badge}, status=status.HTTP_200_OK)
+    except Student.DoesNotExist:
+        return Response({'error': 'Seller not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def current_user_profile(request):
+    """rent_user_profile(request):
+    Return the current authenticated user's profile.
+    urn the current authenticated user's profile."""
+    serializer = SellerPublicSerializer(request.user)
+    return Response(serializer.data)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def deduct_wallet(request):
+    amount = request.data.get('amount')
+    try:
+        amount = Decimal(str(amount))  # Ensure amount is Decimal
+    except (TypeError, ValueError):
+        return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = request.user
+    if user.wallet_amount < amount:
+        return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.wallet_amount -= amount
+    user.save()
+    return Response({'wallet_amount': str(user.wallet_amount)}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_money_to_wallet(request):
+    amount = request.data.get('amount')
+    try:
+        amount = Decimal(str(amount))  
+        if amount <= 0:
+            return Response({'error': 'Amount must be positive.'}, status=status.HTTP_400_BAD_REQUEST)
+    except (TypeError, ValueError):
+        return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = request.user
+    user.wallet_amount += amount
+    user.save()
+    return Response({'wallet_amount': str(user.wallet_amount)}, status=status.HTTP_200_OK)
