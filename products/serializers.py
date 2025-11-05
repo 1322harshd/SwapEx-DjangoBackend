@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product
+from .models import Product,Favorite
 #serializer class definition
 class ProductSerializer(serializers.ModelSerializer):#using ModelSerializer which automatically maps model fields and serializer feilds
     seller = serializers.StringRelatedField(read_only=True)
@@ -13,3 +13,14 @@ class ProductSerializer(serializers.ModelSerializer):#using ModelSerializer whic
                   'is_active', 'primary_image', 'created_at', 'updated_at')
         #fields that cannot be edited
         read_only_fields = ('id', 'seller', 'created_at', 'updated_at')
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(
+        write_only=True, source='product', queryset=ProductSerializer.Meta.model.objects.all()
+    )
+ 
+    class Meta:
+        model = Favorite
+        fields = ['id', 'product', 'product_id', 'created_at']
+        read_only_fields = ['id', 'product', 'created_at']

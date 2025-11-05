@@ -15,3 +15,10 @@ class StudentSignUpSerializer(serializers.ModelSerializer):
         user.is_approved = False  
         user.save()
         return user
+# public serializer for seller info (safe fields only)
+class SellerPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ("id", "first_name", "email", "phone_number", "profile_image", "trust_badge", "joined_at")
+        read_only_fields = fields
+ 
