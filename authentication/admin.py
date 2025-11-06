@@ -1,6 +1,6 @@
 from django.utils.html import mark_safe
 from django.contrib import admin
-from .models import Student, SignupRequest
+from .models import Student, SignupRequest, WalletTransaction
 
 @admin.register(Student)#student model to view student details
 class StudentAdmin(admin.ModelAdmin):
@@ -35,3 +35,8 @@ class SignupRequestAdmin(admin.ModelAdmin):
         updated = queryset.update(is_approved=True)
         self.message_user(request, f"{updated} signup request(s) approved.")
     approve_signup_requests.short_description = "Approve selected signup requests"
+
+@admin.register(WalletTransaction)
+class WalletTransactionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'amount', 'timestamp', 'description')  # <-- 'id' added
+    list_filter = ('user',)

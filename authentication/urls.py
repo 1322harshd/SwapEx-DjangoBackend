@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import StudentSignUpView, CustomTokenObtainPairView, forgot_password_view, give_trust_badge, current_user_profile, deduct_wallet, add_money_to_wallet
+from .views import StudentSignUpView, CustomTokenObtainPairView, forgot_password_view, give_trust_badge, current_user_profile, deduct_wallet, add_money_to_wallet, get_wallet_balance
 
 urlpatterns = [
     path('signup/', StudentSignUpView.as_view(), name='student-signup'),
@@ -9,6 +9,7 @@ urlpatterns = [
     path('me/', current_user_profile, name='current-user-profile'),
     path('wallet/deduct/', deduct_wallet, name='wallet-deduct'),
     path('wallet/add/', add_money_to_wallet, name='wallet-add'),
+    path('wallet/', get_wallet_balance, name='wallet-balance'),
 ]
 
 

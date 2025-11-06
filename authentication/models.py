@@ -51,5 +51,14 @@ class SignupRequest(Student):#proxy model to show signup requests in admin panel
         verbose_name = "Signup Request"
         verbose_name_plural = "Signup Requests"
 
+class WalletTransaction(models.Model):
+    user = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='wallet_transactions')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.email} added {self.amount} on {self.timestamp}"
+
 
 

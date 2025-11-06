@@ -3,7 +3,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import authenticate
-from .models import Student
+from .models import Student, WalletTransaction
 from .serializers import StudentSignUpSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -164,4 +164,18 @@ def add_money_to_wallet(request):
     user = request.user
     user.wallet_amount += amount
     user.save()
+
+    # Save transaction record
+    WalletTransaction.objects.create(
+        user=user,
+        amount=amount,
+        description="Wallet top-up"
+    )
+
+    return Response({'wallet_amount': str(user.wallet_amount)}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_wallet_balance(request):
+    user = request.user
     return Response({'wallet_amount': str(user.wallet_amount)}, status=status.HTTP_200_OK)
