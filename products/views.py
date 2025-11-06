@@ -10,6 +10,10 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from .models import Product
 from .serializers import ProductSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
 # method to give permissions to seller and buyer it returns True if request is made by seller and False if it is made by buyer
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -66,3 +70,20 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         if fav.user != request.user:
             return Response(status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_product_and_deactivate(request, pk):
+    """
+    Update product info and deactivate it until admin approval.
+    """
+    try:
+        product = Product.objects.get(pk=pk, seller=request.user)
+    except Product.DoesNotExist:
+        return Response({'detail': 'Product not found or not owned by you.'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = ProductSerializer(product, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save(is_active=False)  # Deactivate after update
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
