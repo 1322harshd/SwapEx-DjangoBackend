@@ -1,10 +1,8 @@
 from rest_framework import serializers
 from .models import Product,Favorite
-from authentication.serializers import SellerPublicSerializer  # import the public seller serializer
- 
 #serializer class definition
 class ProductSerializer(serializers.ModelSerializer):#using ModelSerializer which automatically maps model fields and serializer feilds
-    seller = SellerPublicSerializer(read_only=True)   # nested seller object
+    seller = serializers.StringRelatedField(read_only=True)
     #serializing image field
     primary_image = serializers.ImageField(required=False, allow_null=True, use_url=True)
     

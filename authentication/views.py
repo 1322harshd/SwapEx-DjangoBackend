@@ -12,7 +12,7 @@ from .serializers import SellerPublicSerializer  # or your user serializer
 from decimal import Decimal
 
 
-class StudentSignUpView(generics.CreateAPIView):
+class StudentSignUpView(generics.CreateAPIView):# generic API view handles POST request to create new objects
     queryset = Student.objects.all()
     serializer_class = StudentSignUpSerializer
 
