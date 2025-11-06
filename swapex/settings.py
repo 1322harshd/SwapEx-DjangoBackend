@@ -147,7 +147,8 @@ REST_FRAMEWORK = {
 
 #Allowing frontend to connect to backend 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", 
+    "http://localhost:5173",
 ]
 #Allowing all connection for development only
 CORS_ALLOW_ALL_ORIGINS = True
+
