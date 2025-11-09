@@ -31,8 +31,7 @@ class ProductViewSet(viewsets.ModelViewSet):#using ModelViewSet which handles al
     ordering_fields = ['price', 'created_at']              
     search_fields = ['title', 'description']               
     parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]  # allow file uploads
- 
-#custom query method to get seller info and not getting products listed by logged in user
+    # Remove logic for handling multiple images
     def get_queryset(self):
         qs = Product.objects.filter(is_active=True).select_related('seller')
         print("DEBUG user:", getattr(self.request, "user", None), "qs_before:", qs.count())
