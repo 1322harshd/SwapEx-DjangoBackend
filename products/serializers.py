@@ -11,8 +11,8 @@ class ProductSerializer(serializers.ModelSerializer):#using ModelSerializer whic
     class Meta:
         model = Product
         fields = ('id', 'seller', 'title', 'category', 'description', 'price', 'condition',
-                  'is_active', 'primary_image', 'created_at', 'updated_at', 'is_sold', 'is_available')
-        
+                  'is_active', 'primary_image', 'created_at', 'updated_at', 'brand', 'manufacture_date')
+        #fields that cannot be edited
         read_only_fields = ('id', 'seller', 'created_at', 'updated_at')
 
 # FavoriteSerializer manages serialization for the Favorite model.

@@ -21,6 +21,7 @@ class Product(models.Model):
     condition = models.CharField(max_length=20, choices=Condition.choices, default=Condition.NEW)
     is_active = models.BooleanField(default=True)
     primary_image = models.ImageField(upload_to='products/primary/', blank=True, null=True)
+    manufacture_date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     brand = models.CharField(max_length=100, blank=True, null=True)

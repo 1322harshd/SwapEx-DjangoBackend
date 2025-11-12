@@ -118,15 +118,21 @@ def give_trust_badge(request):
     except Student.DoesNotExist:
         return Response({'error': 'Seller not found'}, status=status.HTTP_404_NOT_FOUND)
 
-# Returns the profile information of the currently authenticated user.
-@api_view(['GET'])
+@api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def current_user_profile(request):
-    serializer = SellerPublicSerializer(request.user)
-    return Response(serializer.data)
+    user = request.user
+    if request.method == 'GET':
+        serializer = SellerPublicSerializer(user)
+        return Response(serializer.data)
+    elif request.method == 'PATCH':
+        profile_image = request.FILES.get('profile_image')
+        if profile_image:
+            user.profile_image = profile_image
+            user.save()
+        serializer = SellerPublicSerializer(user)
+        return Response(serializer.data)
 
-# Deducts a specified amount from the authenticated user's wallet.
-# Checks for sufficient balance before deducting.
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def deduct_wallet(request):

@@ -6,11 +6,11 @@ from .models import Product, PendingProduct, ProductSaleTransaction
 # It provides custom list display, filtering, searching, and bulk actions for product approval/rejection.
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'seller', 'price', 'condition', 'is_active', 'is_sold', 'created_at')
-    list_filter = ('is_active', 'is_sold', 'condition', 'category')
+    list_display = ('id', 'title', 'seller', 'price', 'condition', 'brand', 'manufacture_date', 'is_active', 'created_at')
+    list_filter = ('is_active', 'condition', 'category', 'brand', 'manufacture_date')
     search_fields = ('title', 'description', 'seller__email')
     readonly_fields = ('primary_image_link', 'created_at', 'updated_at')
-    fields = ('seller', 'title', 'category', 'description', 'price', 'condition', 'is_active',
+    fields = ('seller', 'title', 'category', 'description', 'price', 'condition', 'brand', 'manufacture_date', 'is_active',
               'primary_image_link', 'created_at', 'updated_at')
     actions = ['approve_products', 'reject_products']
 
@@ -48,11 +48,12 @@ class ProductAdmin(admin.ModelAdmin):
 # Only shows products that are not yet active, and provides custom actions for approval/rejection.
 @admin.register(PendingProduct)
 class PendingProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'seller', 'price', 'condition', 'is_active', 'created_at')
-    list_filter = ('condition', 'category')
+    list_display = ('id', 'title', 'seller', 'price', 'condition', 'brand', 'manufacture_date', 'is_active', 'created_at')
+    list_filter = ('condition', 'category', 'brand', 'manufacture_date')
     search_fields = ('title', 'description', 'seller__email')
     readonly_fields = ('primary_image_link', 'created_at', 'updated_at')
-    fields = ('seller', 'title', 'category', 'description', 'price', 'condition', 'is_active', 'primary_image_link', 'created_at', 'updated_at')
+    # include is_active so admin can toggle approval on the product detail form
+    fields = ('seller', 'title', 'category', 'description', 'price', 'condition', 'brand', 'manufacture_date', 'is_active', 'primary_image_link', 'created_at', 'updated_at')
     actions = ['approve_pending', 'reject_pending']
 
     # Only show products that are not active (pending approval).

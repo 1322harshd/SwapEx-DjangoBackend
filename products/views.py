@@ -25,7 +25,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 class ProductViewSet(viewsets.ModelViewSet):#using ModelViewSet which handles all basic endpoints
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]#adding permission classes
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,permissions.IsAuthenticated]#adding permission classes
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]#adding filters
     filterset_fields = ['condition', 'category']           
     ordering_fields = ['price', 'created_at']              
@@ -45,8 +45,15 @@ class ProductViewSet(viewsets.ModelViewSet):#using ModelViewSet which handles al
  
     #debug helper
     def create(self, request, *args, **kwargs):
-        print("REQUEST DATA:", request.data)   
-        return super().create(request, *args, **kwargs)
+        # Preprocess manufacture_date: convert empty string to None
+        data = request.data.copy()
+        if data.get("manufacture_date", None) == "":
+            data["manufacture_date"] = None
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def my(self, request):
@@ -86,7 +93,11 @@ def update_product_and_deactivate(request, pk):
     except Product.DoesNotExist:
         return Response({'detail': 'Product not found or not owned by you.'}, status=status.HTTP_404_NOT_FOUND)
 
-    serializer = ProductSerializer(product, data=request.data, partial=True)
+    # Preprocess manufacture_date: convert empty string to None
+    data = request.data.copy()
+    if data.get("manufacture_date", None) == "":
+        data["manufacture_date"] = None
+    serializer = ProductSerializer(product, data=data, partial=True)
     if serializer.is_valid():
         serializer.save(is_active=False)  # Deactivate after update
         return Response(serializer.data, status=status.HTTP_200_OK)
