@@ -8,14 +8,17 @@ from .serializers import StudentSignUpSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .serializers import SellerPublicSerializer  # or your user serializer
+from .serializers import SellerPublicSerializer  
 from decimal import Decimal
 
-
-class StudentSignUpView(generics.CreateAPIView):# generic API view handles POST request to create new objects
+# Handles user registration for students.
+# Uses a serializer to validate and create new Student objects.
+class StudentSignUpView(generics.CreateAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSignUpSerializer
 
+# Custom JWT token view that adds extra checks for student approval and password validation.
+# Only allows login if the student is approved and credentials are correct.
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         print("CustomTokenObtainPairView called")  
@@ -23,10 +26,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         # Get email/username and password from request
         email = request.data.get('email')
         password = request.data.get('password')
-        
         print(f"Email: {email}") 
         print(f"Password provided: {password is not None}")  
-        
         try:
             # Check if student exists
             student = Student.objects.get(email=email)
@@ -47,26 +48,22 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                     {'error': 'Invalid credentials.'}, 
                     status=status.HTTP_401_UNAUTHORIZED
                 )
-            
             print("All checks passed, proceeding with token generation")  
-                
         except Student.DoesNotExist:
             print("Student does not exist") 
             return Response(
                 {'error': 'Invalid credentials.'}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        
         # If all checks pass, proceed with normal token generation
         return super().post(request, *args, **kwargs)
 
-
+# Allows users to reset their password by providing their email and a new password.
 @api_view(['POST'])
 def forgot_password_view(request):
     """Reset password - checks if email exists and updates password"""
     email = request.data.get('email')
     new_password = request.data.get('new_password')
-    
     print(f"🔍 Password reset attempt for: {email}")
     
     # Validate input
@@ -75,23 +72,17 @@ def forgot_password_view(request):
             'message': 'Email and new password are required.',
             'status': 'error'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
     if len(new_password) < 6:
         return Response({
             'message': 'Password must be at least 6 characters long.',
             'status': 'error'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
     try:
         # Check if user exists in database
         student = Student.objects.get(email=email)
-        
         print(f"✅ User found: {email}")
-        
-        # Update password (this will hash it properly)
         student.set_password(new_password)
         student.save()
-        
         print(f"✅ Password updated successfully for: {email}")
         
         return Response({
@@ -113,6 +104,8 @@ def forgot_password_view(request):
             'status': 'error'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Allows authenticated users to give a trust badge to a seller.
+# Increments the seller's trust badge count.
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def give_trust_badge(request):
@@ -125,14 +118,15 @@ def give_trust_badge(request):
     except Student.DoesNotExist:
         return Response({'error': 'Seller not found'}, status=status.HTTP_404_NOT_FOUND)
 
+# Returns the profile information of the currently authenticated user.
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def current_user_profile(request):
-    """rent_user_profile(request):
-    Return the current authenticated user's profile.
-    urn the current authenticated user's profile."""
     serializer = SellerPublicSerializer(request.user)
     return Response(serializer.data)
+
+# Deducts a specified amount from the authenticated user's wallet.
+# Checks for sufficient balance before deducting.
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def deduct_wallet(request):
@@ -150,6 +144,7 @@ def deduct_wallet(request):
     user.save()
     return Response({'wallet_amount': str(user.wallet_amount)}, status=status.HTTP_200_OK)
 
+# Adds money to the authenticated user's wallet and records the transaction.
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_money_to_wallet(request):
@@ -165,7 +160,7 @@ def add_money_to_wallet(request):
     user.wallet_amount += amount
     user.save()
 
-    # Save transaction record
+    # for Save transaction record
     WalletTransaction.objects.create(
         user=user,
         amount=amount,
@@ -174,8 +169,10 @@ def add_money_to_wallet(request):
 
     return Response({'wallet_amount': str(user.wallet_amount)}, status=status.HTTP_200_OK)
 
+# Returns the current wallet balance of the authenticated user.
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_wallet_balance(request):
     user = request.user
     return Response({'wallet_amount': str(user.wallet_amount)}, status=status.HTTP_200_OK)
+

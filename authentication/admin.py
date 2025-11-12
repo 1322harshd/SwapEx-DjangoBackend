@@ -38,5 +38,5 @@ class SignupRequestAdmin(admin.ModelAdmin):
 
 @admin.register(WalletTransaction)
 class WalletTransactionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'amount', 'timestamp', 'description')  # <-- 'id' added
+    list_display = ('id', 'user', 'amount', 'timestamp', 'description')  
     list_filter = ('user',)

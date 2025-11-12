@@ -3,6 +3,7 @@ from django.conf import settings
 
 #model for products
 class Product(models.Model):
+    # Enum for product condition, making it easy to select and display quality.
     class Condition(models.TextChoices):
         NEW = 'new', 'New'
         LIKE_NEW = 'used_like_new', 'Used - Like New'
@@ -42,16 +43,28 @@ class PendingProduct(Product):
         verbose_name = "Pending product"
         verbose_name_plural = "Pending products"
 
+# Favorite model allows users to mark products as favorites for quick access.
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='favorites')
     product = models.ForeignKey('products.Product', on_delete=models.CASCADE, related_name='favorited_by')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Ensure a user can only favorite a product once.
     class Meta:
         unique_together = ('user', 'product')
         ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.user} -> {self.product}"
+
+# ProductSaleTransaction records each sale, linking the product, buyer, and sale details.
+class ProductSaleTransaction(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sale_transactions')
+    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='purchases')
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Sale: {self.product.title} to {self.buyer.email} for {self.amount} on {self.timestamp}"
 
 

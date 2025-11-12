@@ -10,6 +10,7 @@ urlpatterns = [
     path('wallet/deduct/', deduct_wallet, name='wallet-deduct'),
     path('wallet/add/', add_money_to_wallet, name='wallet-add'),
     path('wallet/', get_wallet_balance, name='wallet-balance'),
+    
 ]
 
 
