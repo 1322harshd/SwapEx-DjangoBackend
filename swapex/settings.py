@@ -89,13 +89,13 @@ WSGI_APPLICATION = 'swapex.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'SwapEx-Database',
-        'USER': 'postgres',
-        'PASSWORD': '13Dhillon@nz',
-        'HOST': 'localhost',  # Change from empty to 'localhost'
-        'PORT': '5432',       # Change from empty to '5432'
-    }   
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql_psycopg2'),
+        'NAME': os.environ.get('DB_NAME', 'SwapEx-Database'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '13Dhillon@nz'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+    }
 }
 
 
