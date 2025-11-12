@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from .models import Product,Favorite
+from .models import Product, Favorite
 from authentication.serializers import SellerPublicSerializer  # import the public seller serializer
 
-#serializer class definition
 class ProductSerializer(serializers.ModelSerializer):#using ModelSerializer which automatically maps model fields and serializer feilds
     seller = SellerPublicSerializer(read_only=True)   # nested seller object
     #serializing image field
