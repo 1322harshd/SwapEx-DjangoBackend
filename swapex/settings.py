@@ -149,9 +149,6 @@ USE_TZ = True
 # Static & Media Files Configuration
 # -------------------------------
 
-# STATIC_ROOT for local development ONLY
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 # Check if S3 bucket variables exist → means we are in production (Elastic Beanstalk)
 if os.environ.get('AWS_STORAGE_BUCKET_NAME'):
 
@@ -176,6 +173,7 @@ if os.environ.get('AWS_STORAGE_BUCKET_NAME'):
     # Static files on S3 (Django admin, CSS, JS)
     STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
     STATICFILES_STORAGE = 'swapex.storage_backends.StaticStorage'
+    # DO NOT set STATIC_ROOT when using S3 - it will use local storage instead
 
     # Media files on S3 (user uploads)
     DEFAULT_FILE_STORAGE = 'swapex.storage_backends.MediaStorage'
@@ -186,6 +184,9 @@ else:
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
 
+    # STATIC_ROOT for local development ONLY
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    
     # Local media folder
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
