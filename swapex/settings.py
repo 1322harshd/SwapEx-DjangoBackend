@@ -172,12 +172,19 @@ if os.environ.get('AWS_STORAGE_BUCKET_NAME'):
 
     # Static files on S3 (Django admin, CSS, JS)
     STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
-    STATICFILES_STORAGE = 'swapex.storage_backends.StaticStorage'
-    # DO NOT set STATIC_ROOT when using S3 - it will use local storage instead
-
+    
     # Media files on S3 (user uploads)
-    DEFAULT_FILE_STORAGE = 'swapex.storage_backends.MediaStorage'
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+    
+    # Django 4.2+ STORAGES setting (replaces STATICFILES_STORAGE and DEFAULT_FILE_STORAGE)
+    STORAGES = {
+        "default": {
+            "BACKEND": "swapex.storage_backends.MediaStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "swapex.storage_backends.StaticStorage",
+        },
+    }
 
 else:
     # Local development (no S3)
