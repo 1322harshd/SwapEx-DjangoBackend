@@ -26,7 +26,11 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-)=ff*fk&1n$2s^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+# Allow Elastic Beanstalk domains automatically
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# Also allow .elasticbeanstalk.com domains in production
+if 'DB_NAME' in os.environ:  # Production environment
+    ALLOWED_HOSTS.append('.elasticbeanstalk.com')
 
 
 # Application definition
