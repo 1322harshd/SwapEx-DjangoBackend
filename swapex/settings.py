@@ -215,6 +215,12 @@ REST_FRAMEWORK = {
 }
 
 #Allowing frontend to connect to backend 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = []  # No frontend deployed yet
+CORS_ALLOW_ALL_ORIGINS = False  # Disabled for security - using specific origins instead
+CORS_ALLOWED_ORIGINS = [
+    'https://swapex-verceldeployment-itgt18yo8.vercel.app',
+    'http://localhost:5173',  # Vite dev server
+    'http://localhost:3000',  # Alternative local port
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000',
+]
 
