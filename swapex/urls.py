@@ -18,8 +18,23 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
+
+def api_root(request):
+    """Root endpoint to confirm API is running"""
+    return JsonResponse({
+        'status': 'success',
+        'message': 'SwapEx API is running',
+        'version': '1.0',
+        'endpoints': {
+            'admin': '/admin/',
+            'api_auth': '/api/auth/',
+            'api_products': '/api/products/',
+        }
+    })
 
 urlpatterns = [
+    path('', api_root, name='api-root'),  # Root URL
     path('admin/', admin.site.urls),
     path('api/', include('authentication.urls')),
     path('api/',include('products.urls')),

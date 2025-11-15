@@ -26,11 +26,26 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-)=ff*fk&1n$2s^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Allow Elastic Beanstalk domains automatically
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-# Also allow .elasticbeanstalk.com domains in production
+# Production ALLOWED_HOSTS configuration
+ALLOWED_HOSTS = [
+    ".swapex.art",
+    "swapex.art", 
+    "www.swapex.art",
+    ".elasticbeanstalk.com",
+    "localhost",
+    "127.0.0.1",
+]
+
+# HTTPS/Security Settings for Production
 if 'DB_NAME' in os.environ:  # Production environment
-    ALLOWED_HOSTS.append('.elasticbeanstalk.com')
+    # HTTPS enforcement
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 
 # Application definition
@@ -217,10 +232,34 @@ REST_FRAMEWORK = {
 #Allowing frontend to connect to backend 
 CORS_ALLOW_ALL_ORIGINS = False  # Disabled for security - using specific origins instead
 CORS_ALLOWED_ORIGINS = [
+    'https://swapex.art',
+    'https://www.swapex.art',
     'https://swapex-verceldeployment-itgt18yo8.vercel.app',
     'http://localhost:5173',  # Vite dev server
     'http://localhost:3000',  # Alternative local port
     'http://127.0.0.1:5173',
     'http://127.0.0.1:3000',
+]
+
+# Additional CORS settings for production
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
