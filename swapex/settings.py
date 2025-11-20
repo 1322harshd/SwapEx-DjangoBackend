@@ -234,15 +234,13 @@ CORS_ALLOW_ALL_ORIGINS = False  # Disabled for security - using specific origins
 CORS_ALLOWED_ORIGINS = [
     'https://swapex.art',
     'https://www.swapex.art',
-    'https://swapex-verceldeployment-itgt18yo8.vercel.app',
-    'https://swapex-verceldeployment-r9jy37eub.vercel.app',  # Current deployment
     'http://localhost:5173',  # Vite dev server
     'http://localhost:3000',  # Alternative local port
     'http://127.0.0.1:5173',
     'http://127.0.0.1:3000',
 ]
 
-# Allow all Vercel preview deployments (alternative approach - more flexible)
+# Allow all Vercel preview deployments for testing (can be removed in final production)
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://swapex-verceldeployment.*\.vercel\.app$",
 ]
