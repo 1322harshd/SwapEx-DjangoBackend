@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,31 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)=ff*fk&1n$2s^fk1$#m3rk8b%!c5g218jqi78!feig8wq%iaz'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-)=ff*fk&1n$2s^fk1$#m3rk8b%!c5g218jqi78!feig8wq%iaz')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+# Production ALLOWED_HOSTS configuration
+ALLOWED_HOSTS = [
+    ".swapex.art",
+    "swapex.art", 
+    "www.swapex.art",
+    ".elasticbeanstalk.com",
+    "localhost",
+    "127.0.0.1",
+]
+
+# HTTPS/Security Settings for Production
+if 'DB_NAME' in os.environ:  # Production environment
+    # HTTPS enforcement
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 
 # Application definition
@@ -37,7 +57,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'authentication',
+    'rest_framework',
+    'corsheaders',
+    'products',
+    'django_filters',
+    'storages',
 ]
+#Setting custom user model for authentication
+AUTH_USER_MODEL = 'authentication.Student'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -47,6 +75,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'swapex.urls'
@@ -72,12 +102,32 @@ WSGI_APPLICATION = 'swapex.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Production database for Elastic Beanstalk
+if 'DB_NAME' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql_psycopg2'),
+            'NAME': os.environ['DB_NAME'],
+            'USER': os.environ['DB_USER'],
+            'PASSWORD': os.environ['DB_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
     }
-}
+
+# Local development fallback
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'todoapp_db',
+            'USER': 'postgres',
+            'PASSWORD': '13Dhillon@nz',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        },
+    }
+
 
 
 # Password validation
@@ -114,9 +164,106 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+# -------------------------------
+# Static & Media Files Configuration
+# -------------------------------
+
+# Check if S3 bucket variables exist → means we are in production (Elastic Beanstalk)
+if os.environ.get('AWS_STORAGE_BUCKET_NAME'):
+
+    # S3 production settings
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'ap-southeast-2')
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get(
+        'AWS_S3_CUSTOM_DOMAIN',
+        f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+    )
+    
+    # Additional S3 settings for better performance and security
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_DEFAULT_ACL = None  # Use bucket policy instead of ACLs
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_QUERYSTRING_AUTH = False
+
+    # Static files on S3 (Django admin, CSS, JS)
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+    
+    # Media files on S3 (user uploads)
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+    
+    # Django 4.2+ STORAGES setting (replaces STATICFILES_STORAGE and DEFAULT_FILE_STORAGE)
+    STORAGES = {
+        "default": {
+            "BACKEND": "swapex.storage_backends.MediaStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "swapex.storage_backends.StaticStorage",
+        },
+    }
+
+else:
+    # Local development (no S3)
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+
+    # STATIC_ROOT for local development ONLY
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    
+    # Local media folder
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#rest framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+#Allowing frontend to connect to backend 
+CORS_ALLOW_ALL_ORIGINS = False  # Disabled for security - using specific origins instead
+CORS_ALLOWED_ORIGINS = [
+    'https://swapex.art',
+    'https://www.swapex.art',
+    'http://localhost:5173',  # Vite dev server
+    'http://localhost:3000',  # Alternative local port
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000',
+]
+
+# Allow all Vercel preview deployments for testing (can be removed in final production)
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://swapex-verceldeployment.*\.vercel\.app$",
+]
+
+# Additional CORS settings for production
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
